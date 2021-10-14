@@ -1,0 +1,45 @@
+{
+  "name": "accolade-chart-lib",
+  "description": "Library for the Accolade company to render custom charts",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/visualio/accolade-chart-lib.git"
+  },
+  "author": "Visualio",
+  "bugs": {
+    "url": "https://github.com/visualio/accolade-chart-lib/issues"
+  },
+  "homepage": "https://github.com/visualio/accolade-chart-lib#readme",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "dist/accolade-chart-lib.umd.js",
+  "module": "dist/accolade-chart-lib.es.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4",
+    "vite": "^2.6.7"
+  },
+  "peerDependencies": {},
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "dependencies": {
+    "d3": "^7.1.1",
+    "lodash.pairs": "^3.0.1",
+    "svg-path-parser": "^1.1.0"
+  }
+}
