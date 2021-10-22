@@ -17,6 +17,53 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+const symbolRatio = 1.7556;
+const symbolIndentRatio = 0.54;
+const symbolBodyRatio = 0.68;
+const symbolTextRatio = symbolBodyRatio * 0.5;
+const symbolPointRatio = 0.05;
+const fontAspectRatio = 0.5;
+const fontFamilyPrimary = `'Gotham CE', 'Gotham', sans-serif`;
+const fontSize = 20;
+const labelOffset = fontSize * 3;
+const margin = { bottom: 85, right: 0, top: fontSize, left: 0 };
+const colors = {
+  tick: `#dcdee6`,
+  label: `#000`,
+  line: `#808285`,
+  area: `#dcdee6`,
+  point: `#fff`,
+  doughnutStroke: `#eaf6fe`,
+  doughnutCenter: `#28225c`
+};
+const transparentColor = {
+  start: { r: 0, g: 0, b: 0, a: 0 },
+  end: { r: 0, g: 0, b: 0, a: 0 },
+  border: { r: 0, g: 0, b: 0, a: 0 }
+};
+const brandColors = [
+  { r: 206, g: 2, b: 32 },
+  { r: 227, g: 6, b: 19 },
+  { r: 244, g: 69, b: 0 },
+  { r: 249, g: 116, b: 8 },
+  { r: 245, g: 156, b: 0 },
+  { r: 253, g: 195, b: 0 },
+  { r: 255, g: 222, b: 20 },
+  { r: 65, g: 192, b: 240 },
+  { r: 7, g: 169, b: 219 },
+  { r: 12, g: 139, b: 188 },
+  { r: 0, g: 120, b: 179 },
+  { r: 25, g: 97, b: 155 },
+  { r: 29, g: 68, b: 130 },
+  { r: 21, g: 43, b: 122 },
+  { r: 41, g: 35, b: 92 },
+  { r: 167, g: 169, b: 172 }
+];
+const colorSets = brandColors.map((color2) => ({
+  start: { r: 255, g: 255, b: 255, a: 1 },
+  end: __spreadProps(__spreadValues({}, rgbaToRgb(__spreadProps(__spreadValues({}, color2), { a: 0.5 }))), { a: 1 }),
+  border: __spreadProps(__spreadValues({}, color2), { a: 1 })
+}));
 function peg$subclass(child, parent) {
   function ctor() {
     this.constructor = child;
@@ -1869,71 +1916,10 @@ function makeSVGPathCommandsAbsolute(commands) {
   });
   return commands;
 }
-function rgbaToRgb({
-  r,
-  g,
-  b,
-  a,
-  r2 = 255,
-  g2 = 255,
-  b2 = 255
-}) {
-  return {
-    r: Math.round((1 - a) * r2 + a * r),
-    g: Math.round((1 - a) * g2 + a * g),
-    b: Math.round((1 - a) * b2 + a * b)
-  };
-}
-const symbolRatio = 1.7556;
-const symbolIndentRatio = 0.54;
-const symbolBodyRatio = 0.68;
-const symbolTextRatio = symbolBodyRatio * 0.5;
-const symbolPointRatio = 0.05;
-const fontAspectRatio = 0.5;
-const fontFamilyPrimary = `'Gotham CE', 'Gotham', sans-serif`;
-const fontSize = 20;
-const labelOffset = fontSize * 3;
-const margin = { bottom: 85, right: 0, top: fontSize, left: 0 };
-const colors = {
-  tick: `#dcdee6`,
-  label: `#000`,
-  line: `#808285`,
-  area: `#dcdee6`,
-  point: `#fff`,
-  doughnutStroke: `#eaf6fe`,
-  doughnutCenter: `#28225c`
-};
-const transparentColor = {
-  start: { r: 0, g: 0, b: 0, a: 0 },
-  end: { r: 0, g: 0, b: 0, a: 0 },
-  border: { r: 0, g: 0, b: 0, a: 0 }
-};
-const brandColors = [
-  { r: 206, g: 2, b: 32 },
-  { r: 227, g: 6, b: 19 },
-  { r: 244, g: 69, b: 0 },
-  { r: 249, g: 116, b: 8 },
-  { r: 245, g: 156, b: 0 },
-  { r: 253, g: 195, b: 0 },
-  { r: 255, g: 222, b: 20 },
-  { r: 65, g: 192, b: 240 },
-  { r: 7, g: 169, b: 219 },
-  { r: 12, g: 139, b: 188 },
-  { r: 0, g: 120, b: 179 },
-  { r: 25, g: 97, b: 155 },
-  { r: 29, g: 68, b: 130 },
-  { r: 21, g: 43, b: 122 },
-  { r: 41, g: 35, b: 92 },
-  { r: 167, g: 169, b: 172 }
-];
-brandColors.map((color2) => ({
-  start: { r: 255, g: 255, b: 255, a: 1 },
-  end: __spreadProps(__spreadValues({}, rgbaToRgb(__spreadProps(__spreadValues({}, color2), { a: 0.5 }))), { a: 1 }),
-  border: __spreadProps(__spreadValues({}, color2), { a: 1 })
-}));
 const CHART_TYPE_LINE = `line`;
 const CHART_TYPE_BAR = `bar`;
 const CHART_TYPE_DOUGHNUT = `doughnut`;
+const CHART_TYPE_TABLE = `table`;
 const SORT_TYPE_ORIGINAL = `originalSort`;
 const SORT_TYPE_KEY = `keySort`;
 const SORT_TYPE_VALUE = `valueSort`;
@@ -5600,6 +5586,21 @@ function getMaxLength(data) {
     return currentMax > maxLength ? currentMax : maxLength;
   }, 0);
 }
+function rgbaToRgb$1({
+  r,
+  g,
+  b,
+  a,
+  r2 = 255,
+  g2 = 255,
+  b2 = 255
+}) {
+  return {
+    r: Math.round((1 - a) * r2 + a * r),
+    g: Math.round((1 - a) * g2 + a * g),
+    b: Math.round((1 - a) * b2 + a * b)
+  };
+}
 function redrawBarChart({ chart, set: set2, xScale, yScale, colors: colors$1, cols, labels, width, height, unit: unit2 }) {
   const t = transition().duration(1e3);
   const delay = (x2, i) => 500 + i * 100;
@@ -5620,7 +5621,7 @@ function redrawBarChart({ chart, set: set2, xScale, yScale, colors: colors$1, co
   const getBarFill = ([key]) => {
     const colorKey = cols[key].colors;
     const { end } = colors$1[colorKey];
-    const { r, g, b } = rgbaToRgb(end);
+    const { r, g, b } = rgbaToRgb$1(end);
     return `rgb(${r}, ${g}, ${b})`;
   };
   barsEnter.append(`path`).attr(`class`, `bar__color`).attr(`fill`, getBarFill).attr(`d`, (pair) => getBarPath(pair, `init`)).transition(t).delay(delay).attr(`d`, getBarPath);
@@ -5895,6 +5896,9 @@ function isLineChart(type) {
 function isChart(type) {
   return type === CHART_TYPE_BAR || type === CHART_TYPE_DOUGHNUT || type === CHART_TYPE_LINE;
 }
+function isTable(type) {
+  return type === CHART_TYPE_TABLE;
+}
 function getChartWidth(state) {
   return state.width - getChartLeftMargin(state);
 }
@@ -6167,7 +6171,7 @@ function draw(element, state) {
     renderChart(set2, state, chart);
     renderHeader(state, app);
     renderChartFooter(set2, state, app);
-  } else {
+  } else if (isTable(state.chartType)) {
     element.classList.add(`table`);
     const table = document.createElement(`table`);
     table.className = `table`;
@@ -6187,4 +6191,4 @@ function draw(element, state) {
     });
   }
 }
-export { draw as default };
+export { colorSets, colors, draw as default };
