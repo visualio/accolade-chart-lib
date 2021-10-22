@@ -17,6 +17,47 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+function findLongestConsecutive(numbers) {
+  const chunks = [[]];
+  let previousValue = 0;
+  numbers.forEach((currentValue) => {
+    if (previousValue + 1 === currentValue) {
+      chunks[chunks.length - 1].push(currentValue);
+    } else {
+      chunks.push([currentValue]);
+    }
+    previousValue = currentValue;
+  });
+  chunks.sort((a, b) => b.length - a.length);
+  return chunks[0];
+}
+function getLastItemFromObject(obj) {
+  return obj[Object.keys(obj)[Object.keys(obj).length - 1]];
+}
+function getMaxLength(data) {
+  return Object.values(data).reduce((maxLength, { values }) => {
+    const currentMax = Math.max(...Object.values(values).map((i) => i.length));
+    return currentMax > maxLength ? currentMax : maxLength;
+  }, 0);
+}
+function rgbaToRgb({
+  r,
+  g,
+  b,
+  a,
+  r2 = 255,
+  g2 = 255,
+  b2 = 255
+}) {
+  return {
+    r: Math.round((1 - a) * r2 + a * r),
+    g: Math.round((1 - a) * g2 + a * g),
+    b: Math.round((1 - a) * b2 + a * b)
+  };
+}
 const symbolRatio = 1.7556;
 const symbolIndentRatio = 0.54;
 const symbolBodyRatio = 0.68;
@@ -5560,47 +5601,6 @@ Object.create(MonotoneX.prototype).point = function(x2, y2) {
 function monotoneX(context) {
   return new MonotoneX(context);
 }
-function isNumeric(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
-}
-function findLongestConsecutive(numbers) {
-  const chunks = [[]];
-  let previousValue = 0;
-  numbers.forEach((currentValue) => {
-    if (previousValue + 1 === currentValue) {
-      chunks[chunks.length - 1].push(currentValue);
-    } else {
-      chunks.push([currentValue]);
-    }
-    previousValue = currentValue;
-  });
-  chunks.sort((a, b) => b.length - a.length);
-  return chunks[0];
-}
-function getLastItemFromObject(obj) {
-  return obj[Object.keys(obj)[Object.keys(obj).length - 1]];
-}
-function getMaxLength(data) {
-  return Object.values(data).reduce((maxLength, { values }) => {
-    const currentMax = Math.max(...Object.values(values).map((i) => i.length));
-    return currentMax > maxLength ? currentMax : maxLength;
-  }, 0);
-}
-function rgbaToRgb$1({
-  r,
-  g,
-  b,
-  a,
-  r2 = 255,
-  g2 = 255,
-  b2 = 255
-}) {
-  return {
-    r: Math.round((1 - a) * r2 + a * r),
-    g: Math.round((1 - a) * g2 + a * g),
-    b: Math.round((1 - a) * b2 + a * b)
-  };
-}
 function redrawBarChart({ chart, set: set2, xScale, yScale, colors: colors$1, cols, labels, width, height, unit: unit2 }) {
   const t = transition().duration(1e3);
   const delay = (x2, i) => 500 + i * 100;
@@ -5621,7 +5621,7 @@ function redrawBarChart({ chart, set: set2, xScale, yScale, colors: colors$1, co
   const getBarFill = ([key]) => {
     const colorKey = cols[key].colors;
     const { end } = colors$1[colorKey];
-    const { r, g, b } = rgbaToRgb$1(end);
+    const { r, g, b } = rgbaToRgb(end);
     return `rgb(${r}, ${g}, ${b})`;
   };
   barsEnter.append(`path`).attr(`class`, `bar__color`).attr(`fill`, getBarFill).attr(`d`, (pair) => getBarPath(pair, `init`)).transition(t).delay(delay).attr(`d`, getBarPath);
