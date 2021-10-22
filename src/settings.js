@@ -1,3 +1,5 @@
+import {rgbaToRgb} from "./utils";
+
 export const symbolRatio = 1.7556
 export const symbolIndentRatio = 0.54
 export const symbolBodyRatio = 0.68
