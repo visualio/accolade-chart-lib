@@ -6169,15 +6169,25 @@ function draw(element, state) {
     const chart = prepareChart(svg, state);
     const set2 = getChartSpecificData(state);
     renderChart(set2, state, chart);
-    renderHeader(state, app);
-    renderChartFooter(set2, state, app);
+    renderHeader(state, element);
+    renderChartFooter(set2, state, element);
+    return (newState) => {
+      const set3 = getChartSpecificData(newState);
+      chart.select(`.axis--y`).call(createYAxis(set3, newState));
+      chart.select(`.axis--x`).call(createXAxis(set3, newState));
+      renderChart(set3, newState, chart);
+      element.querySelector("header").remove();
+      renderHeader(newState, element);
+      element.querySelector("footer").remove();
+      renderChartFooter(set3, newState, element);
+    };
   } else if (isTable(state.chartType)) {
     element.classList.add(`table`);
     const table = document.createElement(`table`);
     table.className = `table`;
     const tableWrapper = document.createElement(`div`);
     tableWrapper.className = `table-wrapper`;
-    renderHeader(state, app);
+    renderHeader(state, element);
     updateTable(table, state);
     tableWrapper.appendChild(table);
     element.appendChild(tableWrapper);
@@ -6189,6 +6199,9 @@ function draw(element, state) {
       const heights = [...row.children].map((cell) => cell.getBoundingClientRect().height);
       row.style.setProperty(`--cellHeight`, `${Math.max(...heights)}px`);
     });
+    return (newState) => {
+      updateTable(table, newState);
+    };
   }
 }
 export { colorSets, colors, draw as default };

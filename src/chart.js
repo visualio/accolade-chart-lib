@@ -443,11 +443,9 @@ export function setFormatLocale(locale) {
 
 export default function(element, state) {
     if (isChart(state.chartType)) {
-        // chart render
         state.height = isDoughnutChart(state.chartType) ? state.width : state.height
         const root = select(element)
             .attr(`class`, `renderer ${state.chartType}-chart ${state.orientation}`)
-
         const svg = root
             .append(`svg`)
             .attr(`viewBox`, `0 0 ${state.width} ${state.height}`)
@@ -457,8 +455,20 @@ export default function(element, state) {
         const chart = prepareChart(svg, state)
         const set = getChartSpecificData(state)
         renderChart(set, state, chart)
-        renderHeader(state, app)
-        renderChartFooter(set, state, app)
+        renderHeader(state, element)
+        renderChartFooter(set, state, element)
+
+        return (newState) => {
+            const set = getChartSpecificData(newState)
+            chart.select(`.axis--y`).call(createYAxis(set, newState))
+            chart.select(`.axis--x`).call(createXAxis(set, newState))
+            renderChart(set, newState, chart)
+            element.querySelector("header").remove()
+            renderHeader(newState, element)
+            element.querySelector("footer").remove()
+            renderChartFooter(set, newState, element)
+        }
+
     } else if (isTable(state.chartType)) {
         // table render
         element.classList.add(`table`)
@@ -467,7 +477,7 @@ export default function(element, state) {
         const tableWrapper = document.createElement(`div`)
         tableWrapper.className = `table-wrapper`
 
-        renderHeader(state, app)
+        renderHeader(state, element)
         updateTable(table, state)
 
         tableWrapper.appendChild(table)
@@ -483,5 +493,9 @@ export default function(element, state) {
             const heights = [...row.children].map(cell => cell.getBoundingClientRect().height)
             row.style.setProperty(`--cellHeight`, `${Math.max(...heights)}px`)
         })
+
+        return (newState) => {
+            updateTable(table, newState)
+        }
     }
 }
