@@ -7,10 +7,10 @@ import {
 } from 'd3'
 import {colors as colorSettings, symbolPointRatio} from "../settings"
 import pairs from "lodash.pairs"
-import {findLongestConsecutive, getLastItemFromObject, getMaxLength, isNumeric} from "../utils"
+import {findLongestConsecutive, getLastItemFromObject, getMaxLength, isNumeric, uniqueString} from "../utils"
 import {createLabels, setFormatLocale} from "../chart"
 
-function createDefs({chart, colors: colorMap, t, set, xScale}) {
+function createDefs({chart, colors: colorMap, t, set, xScale, idPrefix}) {
 
     const colors = set.map(([, {colors: colorId}]) => [colorId, colorMap[colorId]])
     const defs = chart.select(`defs`)
@@ -22,7 +22,7 @@ function createDefs({chart, colors: colorMap, t, set, xScale}) {
         .append(`linearGradient`)
         .attr(`class`, `gradient`)
         .attr(`gradientTransform`, `rotate(${-15})`)
-        .attr(`id`, ([key]) => `gradient-line-${key}`)
+        .attr(`id`, ([key]) => `${idPrefix}-gradient-line-${key}`)
         .attr(`x1`, `0%`)
         .attr(`y1`, `0%`)
         .attr(`x2`, `0%`)
@@ -62,7 +62,7 @@ function createDefs({chart, colors: colorMap, t, set, xScale}) {
     const clipsEnter = clips.enter()
         .append(`clipPath`)
         .attr(`class`, `clip`)
-        .attr(`id`, ([key]) => `clip${key}`)
+        .attr(`id`, ([key]) => `${idPrefix}-clip${key}`)
     clips.merge(clipsEnter)
 
     const getClipWidth = ([, {values}]) => getClipDimensions(values, xScale).width
@@ -105,11 +105,12 @@ function getClipDimensions(values, xScale) {
 
 export function redrawLineChart({chart, set, xScale, yScale, colors, labels, height, width, locale}) {
     setFormatLocale(locale)
+    const idPrefix = uniqueString()
     const master = set[0][1] // TODO
     const isMaster = (key) => key === `1` // TODO
     const minValue = Math.min(...set.reduce((acc, [, {values}]) => acc.concat(Object.values(values)), []).filter(isNumeric))
     const t = transition().duration(1000)
-    createDefs({chart, colors, t, set, xScale})
+    createDefs({chart, colors, t, set, xScale, idPrefix})
     createLabels(chart, labels, width, height, getMaxLength(set.map(([, obj]) => obj)))
 
     /* top labels */
@@ -119,16 +120,15 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
     topLabels.exit().remove()
     const topLabelsEnter = topLabels.enter().append(`tspan`)
         .attr(`class`, `topLabels`)
-
     topLabelsEnter.merge(topLabels)
         .html(([, {values, name, colors: key}]) => {
             const {border: {r, g, b}} = colors[key]
             const color = `rgb(${r}, ${g}, ${b})`
-            return `
+            return name ? `
                     <tspan y="10" fill="${color}" stroke="${color}" stroke-width="10" font-size="30">•</tspan>
                     <tspan y="5" dx="10" font-size="12">${name}</tspan>
                     <tspan dx="5" font-weight="bold" font-size="12">${format(`,`)(getLastItemFromObject(values))}</tspan>
-            `
+            ` : ``
         })
         .attr(`dx`, (ignore, idx) => idx > 0 ? 20 : -50)
 
@@ -154,8 +154,8 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         .attr(`fill-opacity`, 0)
 
     areasEnter.merge(areas)
-        .attr(`fill`, ([, {colors: colorKey}]) => `url(#gradient-line-${colorKey})`)
-        .attr(`clip-path`, ([key]) => !isMaster(key) && `url(#clip${key})`)
+        .attr(`fill`, ([, {colors: colorKey}]) => `url(#${idPrefix}-gradient-line-${colorKey})`)
+        .attr(`clip-path`, ([key]) => !isMaster(key) && `url(#${idPrefix}-clip${key})`)
         .transition(t)
         .attrTween(`d`, ([key, {values: map}]) => {
             const values = pairs(map)

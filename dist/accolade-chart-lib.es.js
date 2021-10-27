@@ -58,6 +58,9 @@ function rgbaToRgb({
     b: Math.round((1 - a) * b2 + a * b)
   };
 }
+function uniqueString() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
 const symbolRatio = 1.7556;
 const symbolIndentRatio = 0.54;
 const symbolBodyRatio = 0.68;
@@ -5662,12 +5665,12 @@ function redrawBarChart({ chart, set: set2, xScale, yScale, colors: colors$1, co
   const pointsEnter = points.enter().append(`circle`).attr(`class`, `point`).attr(`stroke-width`, 2).attr(`stroke`, colors.line).attr(`fill`, colors.point);
   pointsEnter.merge(points).transition(t).attr(`cx`, getPointX).attr(`r`, () => getPointRadius()).attr(`cy`, ([, value]) => yScale(value));
 }
-function createDefs({ chart, colors: colorMap, t, set: set2, xScale }) {
+function createDefs({ chart, colors: colorMap, t, set: set2, xScale, idPrefix }) {
   const colors2 = set2.map(([, { colors: colorId }]) => [colorId, colorMap[colorId]]);
   const defs = chart.select(`defs`);
   const gradients = defs.selectAll(`.gradient`).data(colors2, ([key]) => key);
   gradients.exit().remove();
-  const gradientsEnter = gradients.enter().append(`linearGradient`).attr(`class`, `gradient`).attr(`gradientTransform`, `rotate(${-15})`).attr(`id`, ([key]) => `gradient-line-${key}`).attr(`x1`, `0%`).attr(`y1`, `0%`).attr(`x2`, `0%`).attr(`y2`, `100%`);
+  const gradientsEnter = gradients.enter().append(`linearGradient`).attr(`class`, `gradient`).attr(`gradientTransform`, `rotate(${-15})`).attr(`id`, ([key]) => `${idPrefix}-gradient-line-${key}`).attr(`x1`, `0%`).attr(`y1`, `0%`).attr(`x2`, `0%`).attr(`y2`, `100%`);
   gradients.merge(gradientsEnter);
   const getStartColor = ([, { start: { r, g, b } }]) => `rgb(${r}, ${g}, ${b})`;
   const getEndColor = ([, { end: { r, g, b } }]) => `rgb(${r}, ${g}, ${b})`;
@@ -5679,7 +5682,7 @@ function createDefs({ chart, colors: colorMap, t, set: set2, xScale }) {
   gradientsEnter.merge(gradients.select(`.gradient__end`).transition(t).attr(`stop-color`, getEndColor)).attr(`stop-opacity`, getEndOpacity);
   const clips = defs.selectAll(`.clip`).data(set2, ([key]) => key);
   clips.exit().remove();
-  const clipsEnter = clips.enter().append(`clipPath`).attr(`class`, `clip`).attr(`id`, ([key]) => `clip${key}`);
+  const clipsEnter = clips.enter().append(`clipPath`).attr(`class`, `clip`).attr(`id`, ([key]) => `${idPrefix}-clip${key}`);
   clips.merge(clipsEnter);
   const getClipWidth = ([, { values }]) => getClipDimensions(values, xScale).width;
   const getClipX = ([, { values }]) => getClipDimensions(values, xScale).x;
@@ -5707,11 +5710,12 @@ function getClipDimensions(values, xScale) {
 }
 function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, labels, height, width, locale: locale2 }) {
   setFormatLocale(locale2);
+  const idPrefix = uniqueString();
   const master = set2[0][1];
   const isMaster = (key) => key === `1`;
   const minValue = Math.min(...set2.reduce((acc, [, { values }]) => acc.concat(Object.values(values)), []).filter(isNumeric));
   const t = transition().duration(1e3);
-  createDefs({ chart, colors: colors$1, t, set: set2, xScale });
+  createDefs({ chart, colors: colors$1, t, set: set2, xScale, idPrefix });
   createLabels(chart, labels, width, height, getMaxLength(set2.map(([, obj]) => obj)));
   const topLabels = chart.select(`.topLeftLabel`).selectAll(`.topLabels`).data(set2, ([key]) => key);
   topLabels.exit().remove();
@@ -5719,18 +5723,18 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
   topLabelsEnter.merge(topLabels).html(([, { values, name, colors: key }]) => {
     const { border: { r, g, b } } = colors$1[key];
     const color2 = `rgb(${r}, ${g}, ${b})`;
-    return `
+    return name ? `
                     <tspan y="10" fill="${color2}" stroke="${color2}" stroke-width="10" font-size="30">\u2022</tspan>
                     <tspan y="5" dx="10" font-size="12">${name}</tspan>
                     <tspan dx="5" font-weight="bold" font-size="12">${format(`,`)(getLastItemFromObject(values))}</tspan>
-            `;
+            ` : ``;
   }).attr(`dx`, (ignore, idx) => idx > 0 ? 20 : -50);
   const masterArea = areaChart().curve(monotoneX).x(([key]) => xScale(key) + xScale.bandwidth() / 2).y0(() => yScale(minValue)).y1(([, value]) => yScale(value));
   const slaveArea = areaChart().curve(monotoneX).x(([key]) => xScale(key) + xScale.bandwidth() / 2).y0(([key]) => yScale(master.values[key])).y1(([key, value]) => value ? yScale(value) : yScale(master.values[key]));
   const areas = chart.selectAll(`.area`).data(set2, ([key]) => key);
   areas.exit().remove();
   const areasEnter = areas.enter().append(`path`).attr(`class`, `area`).attr(`fill-opacity`, 0);
-  areasEnter.merge(areas).attr(`fill`, ([, { colors: colorKey }]) => `url(#gradient-line-${colorKey})`).attr(`clip-path`, ([key]) => !isMaster(key) && `url(#clip${key})`).transition(t).attrTween(`d`, ([key, { values: map2 }]) => {
+  areasEnter.merge(areas).attr(`fill`, ([, { colors: colorKey }]) => `url(#${idPrefix}-gradient-line-${colorKey})`).attr(`clip-path`, ([key]) => !isMaster(key) && `url(#${idPrefix}-clip${key})`).transition(t).attrTween(`d`, ([key, { values: map2 }]) => {
     const values = lodash_pairs(map2);
     const interpolator = interpolateArray(values.map(() => 0), values.map(([, val]) => val));
     return (tr) => {

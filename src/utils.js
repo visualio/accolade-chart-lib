@@ -48,3 +48,7 @@ export function rgbaToRgb({
         b: Math.round(((1 - a) * b2) + (a * b)),
     }
 }
+
+export function uniqueString() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2)
+}
