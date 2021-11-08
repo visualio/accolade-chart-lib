@@ -3070,8 +3070,8 @@ function selection_datum(value) {
   return arguments.length ? this.property("__data__", value) : this.node().__data__;
 }
 function contextListener(listener) {
-  return function(event) {
-    listener.call(this, event, this.__data__);
+  return function(event2) {
+    listener.call(this, event2, this.__data__);
   };
 }
 function parseTypenames(typenames) {
@@ -3140,17 +3140,17 @@ function selection_on(typename, value, options) {
   return this;
 }
 function dispatchEvent(node, type, params) {
-  var window2 = defaultView(node), event = window2.CustomEvent;
-  if (typeof event === "function") {
-    event = new event(type, params);
+  var window2 = defaultView(node), event2 = window2.CustomEvent;
+  if (typeof event2 === "function") {
+    event2 = new event2(type, params);
   } else {
-    event = window2.document.createEvent("Event");
+    event2 = window2.document.createEvent("Event");
     if (params)
-      event.initEvent(type, params.bubbles, params.cancelable), event.detail = params.detail;
+      event2.initEvent(type, params.bubbles, params.cancelable), event2.detail = params.detail;
     else
-      event.initEvent(type, false, false);
+      event2.initEvent(type, false, false);
   }
-  node.dispatchEvent(event);
+  node.dispatchEvent(event2);
 }
 function dispatchConstant(type, params) {
   return function() {
@@ -4381,11 +4381,11 @@ function styleFunction(name, interpolate2, value) {
   };
 }
 function styleMaybeRemove(id2, name) {
-  var on0, on1, listener0, key = "style." + name, event = "end." + key, remove2;
+  var on0, on1, listener0, key = "style." + name, event2 = "end." + key, remove2;
   return function() {
     var schedule2 = set(this, id2), on = schedule2.on, listener = schedule2.value[key] == null ? remove2 || (remove2 = styleRemove(name)) : void 0;
     if (on !== on0 || listener0 !== listener)
-      (on1 = (on0 = on).copy()).on(event, listener0 = listener);
+      (on1 = (on0 = on).copy()).on(event2, listener0 = listener);
     schedule2.on = on1;
   };
 }
@@ -5708,7 +5708,7 @@ function getClipDimensions(values, xScale) {
     width: 0
   };
 }
-function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, labels, height, width, locale: locale2 }) {
+function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, labels, height, width, locale: locale2, cols }) {
   setFormatLocale(locale2);
   const idPrefix = uniqueString();
   const master = set2[0][1];
@@ -5758,19 +5758,32 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
       return line(interpolator(tr).map((value, idx) => [values[idx][0], value]));
     };
   });
+  const tooltip = select("body").append("div").attr("class", "tooltip").style("position", "absolute").style("left", "0").style("top", "0").style("opacity", "0").style("width", "280px").style("pointer-events", "none").style("z-index", "500");
+  const annotationData = Object.entries(cols).filter(([, { annotation }]) => annotation).map(([key, { annotation }]) => [
+    key,
+    annotation,
+    Math.max(...set2.map(([, { values }]) => values[key]).filter((i) => i))
+  ]);
+  const annotations = chart.selectAll(`.annotation`).data(annotationData);
+  annotations.exit().remove();
+  const annotationsEnter = annotations.enter().append(`line`).attr(`class`, `annotation`).attr(`stroke-width`, 2).attr(`fill`, colors.point);
+  annotationsEnter.merge(annotations).transition(t).attr(`x1`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1).attr(`y1`, height).attr(`x2`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1).attr(`y2`, ([, , value]) => yScale(value) - 12).attr(`stroke`, "black");
   const getPointRadius = () => xScale.bandwidth() * symbolPointRatio;
   const getPointX = ([, colKey]) => {
-    return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 1;
+    return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 4;
   };
   const pointsData = set2.sort(([key]) => isMaster(key) ? 1 : -1).reduce((acc, [key, { values }]) => acc.concat(lodash_pairs(values).map((pair) => [key, ...pair])), []).filter(([, , value]) => value);
   const points = chart.selectAll(`.point`).data(pointsData, ([rowKey, colKey]) => rowKey + colKey);
   points.exit().remove();
   const pointsEnter = points.enter().append(`circle`).attr(`class`, `point`).attr(`stroke-width`, 2).attr(`fill`, colors.point);
-  pointsEnter.merge(points).transition(t).attr(`r`, () => getPointRadius()).attr(`cx`, getPointX).attr(`cy`, ([, , value]) => yScale(value)).attr(`stroke`, ([rowKey]) => {
+  pointsEnter.merge(points).transition(t).attr(`r`, () => getPointRadius()).attr(`cx`, getPointX).attr(`cy`, ([, , value]) => {
+    return yScale(value);
+  }).attr(`stroke`, ([rowKey]) => {
     const [, { colors: colorKey }] = set2.find(([key]) => key === rowKey);
     const { border: { r, g, b } } = colors$1[colorKey];
     return `rgb(${r}, ${g}, ${b})`;
   });
+  chart.selectAll(`.annotation-area`).data(annotationData).enter().append(`rect`).attr(`class`, `annotation-area`).attr(`fill`, "transparent").attr(`x`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 14).attr(`y`, ([, , value]) => yScale(value) - 14).attr(`width`, 28).attr(`height`, ([, , value]) => height - yScale(value) + 14).on("mouseover", (x2, [, data]) => tooltip.style("opacity", "1").html(`<dl>${data.map(([key, value]) => `<div><dt>${key}</dt><dd>${value}</dd></div>`).join("")}</dl>`)).on("mousemove", (x2, [, data]) => tooltip.style("left", `${event.pageX}px`).style("top", `${event.pageY}px`)).on("mouseout", () => tooltip.style("opacity", "0"));
 }
 function redrawDoughnutChart({ chart, set: set2, colors: colors2, cols, width, sortDirection, sortType }) {
   const t = transition().duration(1e3).delay(1e3);
@@ -6208,4 +6221,5 @@ function draw(element, state) {
     };
   }
 }
+var style = "";
 export { colorSets, colors, draw as default };

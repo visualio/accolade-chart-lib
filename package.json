@@ -10,7 +10,7 @@
     "url": "https://github.com/visualio/accolade-chart-lib/issues"
   },
   "homepage": "https://github.com/visualio/accolade-chart-lib#readme",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "license": "MIT",
   "main": "dist/accolade-chart-lib.umd.js",
   "module": "dist/accolade-chart-lib.es.js",
@@ -22,6 +22,7 @@
     "node": ">=10"
   },
   "scripts": {
+    "start": "vite serve dev",
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview"
