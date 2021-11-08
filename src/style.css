@@ -1,0 +1,41 @@
+.tooltip {
+    background: white;
+    transition: opacity 500ms, transform 500ms;
+    transform: translate(-50%, calc(-100% - 2rem));
+    box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.25);
+    padding: 1rem;
+    font-size: 0.8rem;
+}
+
+
+.tooltip:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 0;
+    height: 0;
+    border-width: 10px;
+    border-style: solid;
+    border-color: transparent;
+    border-top-color: white;
+    transform: translate(-50%, 0);
+}
+
+.tooltip * {
+    margin: 0;
+    padding: 0;
+}
+
+.tooltip dl > div {
+    display: flex;
+}
+
+.tooltip dd {
+    font-weight: bold;
+    width: 50%;
+}
+
+.tooltip dt {
+    width: 50%;
+}

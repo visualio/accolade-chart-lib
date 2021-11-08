@@ -4,6 +4,7 @@ import {
     area as areaChart,
     interpolateArray,
     curveMonotoneX, format,
+    select
 } from 'd3'
 import {colors as colorSettings, symbolPointRatio} from "../settings"
 import pairs from "lodash.pairs"
@@ -103,7 +104,7 @@ function getClipDimensions(values, xScale) {
     }
 }
 
-export function redrawLineChart({chart, set, xScale, yScale, colors, labels, height, width, locale}) {
+export function redrawLineChart({chart, set, xScale, yScale, colors, labels, height, width, locale, cols}) {
     setFormatLocale(locale)
     const idPrefix = uniqueString()
     const master = set[0][1] // TODO
@@ -207,17 +208,56 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         })
 
 
+    /* annotations */
+    const tooltip = select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("left", "0")
+        .style("top", "0")
+        .style("opacity", "0")
+        .style("width", "280px")
+        .style("pointer-events", "none")
+        .style("z-index", "500");
+
+    const annotationData = Object.entries(cols)
+        .filter(([, {annotation}]) => annotation)
+        .map(([key, {annotation}]) => [
+            key,
+            annotation,
+            Math.max(...set.map(([, {values}]) => values[key]).filter(i => i))
+        ])
+
+    const annotations = chart
+        .selectAll(`.annotation`)
+        .data(annotationData)
+    annotations.exit().remove()
+
+    const annotationsEnter = annotations.enter()
+        .append(`line`)
+        .attr(`class`, `annotation`)
+        .attr(`stroke-width`, 2)
+        .attr(`fill`, colorSettings.point)
+
+    annotationsEnter.merge(annotations)
+        .transition(t)
+        .attr(`x1`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1)
+        .attr(`y1`, height)
+        .attr(`x2`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1)
+        .attr(`y2`, ([, , value]) => yScale(value) - 12)
+        .attr(`stroke`, "black")
+
+
     /* points */
     const getPointRadius = () => xScale.bandwidth() * symbolPointRatio
     const getPointX = ([, colKey]) => {
-        return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 1
+        return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 4
     }
 
     const pointsData =
         set.sort(([key]) => isMaster(key) ? 1 : -1)
             .reduce((acc, [key, {values}]) => acc.concat(pairs(values).map(pair => ([key, ...pair]))), [])
             .filter(([, , value]) => value)
-
     const points = chart.selectAll(`.point`).data(pointsData, ([rowKey, colKey]) => rowKey + colKey)
 
     points.exit().remove()
@@ -231,10 +271,38 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         .transition(t)
         .attr(`r`, () => getPointRadius())
         .attr(`cx`, getPointX)
-        .attr(`cy`, ([, , value]) => yScale(value))
+        .attr(`cy`, ([, , value]) => {
+            // console.log(value)
+            return yScale(value)
+        })
         .attr(`stroke`, ([rowKey]) => {
             const [, {colors: colorKey}] = set.find(([key]) => key === rowKey)
             const {border: {r, g, b}} = colors[colorKey]
             return `rgb(${r}, ${g}, ${b})`
         })
+
+
+    /* annotation trigger */
+    chart
+        .selectAll(`.annotation-area`)
+        .data(annotationData)
+        .enter()
+        .append(`rect`)
+        .attr(`class`, `annotation-area`)
+        .attr(`fill`, "transparent")
+        .attr(`x`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 14)
+        .attr(`y`, ([, , value]) => yScale(value) - 14)
+        .attr(`width`, 28)
+        .attr(`height`, ([, , value]) => height - yScale(value) + 14)
+        .on("mouseover", (x, [, data]) =>
+            tooltip
+                .style("opacity", "1")
+                .html(`<dl>${data.map(([key, value]) => `<div><dt>${key}</dt><dd>${value}</dd></div>`).join('')}</dl>`)
+        )
+        .on("mousemove", (x, [, data]) =>
+            tooltip
+                .style("left", `${event.pageX}px`)
+                .style("top", `${event.pageY}px`)
+        )
+        .on("mouseout", () => tooltip.style("opacity", "0"))
 }
