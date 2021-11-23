@@ -6182,8 +6182,7 @@ function draw(element, state) {
   if (isChart(state.chartType)) {
     state.height = isDoughnutChart(state.chartType) ? state.width : state.height;
     const root2 = select(element).attr(`class`, `renderer ${state.chartType}-chart ${state.orientation}`);
-    const svg = root2.append(`svg`).attr(`viewBox`, `0 0 ${state.width} ${state.height}`).attr(`fontStyle`, `normal`).attr(`fontFamily`, fontFamilyPrimary);
-    const chart = prepareChart(svg, state);
+    const chart = prepareChart(root2, state);
     const set2 = getChartSpecificData(state);
     renderChart(set2, state, chart);
     renderHeader(state, element);
