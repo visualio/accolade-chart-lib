@@ -5758,6 +5758,10 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
       return line(interpolator(tr).map((value, idx) => [values[idx][0], value]));
     };
   });
+  const getPointRadius = () => xScale.bandwidth() * symbolPointRatio;
+  const getPointX = ([, colKey]) => {
+    return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 4;
+  };
   const tooltip = select("body").append("div").attr("class", "tooltip").style("position", "absolute").style("left", "0").style("top", "0").style("opacity", "0").style("width", "280px").style("pointer-events", "none").style("z-index", "500");
   const annotationData = Object.entries(cols).filter(([, { annotation }]) => annotation).map(([key, { annotation }]) => [
     key,
@@ -5767,23 +5771,31 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
   const annotations = chart.selectAll(`.annotation`).data(annotationData);
   annotations.exit().remove();
   const annotationsEnter = annotations.enter().append(`line`).attr(`class`, `annotation`).attr(`stroke-width`, 2).attr(`fill`, colors.point);
-  annotationsEnter.merge(annotations).transition(t).attr(`x1`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1).attr(`y1`, height).attr(`x2`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1).attr(`y2`, ([, , value]) => yScale(value) - 12).attr(`stroke`, "black");
-  const getPointRadius = () => xScale.bandwidth() * symbolPointRatio;
-  const getPointX = ([, colKey]) => {
-    return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 4;
-  };
+  annotationsEnter.merge(annotations).transition(t).attr(`x1`, ([colKey]) => getPointX([0, colKey])).attr(`y1`, height).attr(`x2`, ([colKey]) => getPointX([0, colKey])).attr(`y2`, ([, , value]) => yScale(value) + getPointRadius()).attr(`stroke`, "black");
   const pointsData = set2.sort(([key]) => isMaster(key) ? 1 : -1).reduce((acc, [key, { values }]) => acc.concat(lodash_pairs(values).map((pair) => [key, ...pair])), []).filter(([, , value]) => value);
   const points = chart.selectAll(`.point`).data(pointsData, ([rowKey, colKey]) => rowKey + colKey);
   points.exit().remove();
   const pointsEnter = points.enter().append(`circle`).attr(`class`, `point`).attr(`stroke-width`, 2).attr(`fill`, colors.point);
-  pointsEnter.merge(points).transition(t).attr(`r`, () => getPointRadius()).attr(`cx`, getPointX).attr(`cy`, ([, , value]) => {
-    return yScale(value);
-  }).attr(`stroke`, ([rowKey]) => {
+  pointsEnter.merge(points).transition(t).attr(`r`, () => getPointRadius()).attr(`cx`, getPointX).attr(`cy`, ([, , value]) => yScale(value)).attr(`stroke`, ([rowKey]) => {
     const [, { colors: colorKey }] = set2.find(([key]) => key === rowKey);
     const { border: { r, g, b } } = colors$1[colorKey];
     return `rgb(${r}, ${g}, ${b})`;
   });
-  chart.selectAll(`.annotation-area`).data(annotationData).enter().append(`rect`).attr(`class`, `annotation-area`).attr(`fill`, "transparent").attr(`x`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 14).attr(`y`, ([, , value]) => yScale(value) - 14).attr(`width`, 28).attr(`height`, ([, , value]) => height - yScale(value) + 14).on("mouseover", (x2, [, data]) => tooltip.style("opacity", "1").html(`<dl>${data.map(([key, value]) => `<div><dt>${key}</dt><dd>${value}</dd></div>`).join("")}</dl>`)).on("mousemove", (x2, [, data]) => tooltip.style("left", `${event.pageX}px`).style("top", `${event.pageY}px`)).on("mouseout", () => tooltip.style("opacity", "0"));
+  chart.selectAll(`.annotation-area`).data(annotationData).enter().append(`rect`).attr(`class`, `annotation-area`).attr(`fill`, "transparent").attr(`x`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 14).attr(`y`, ([, , value]) => yScale(value) - 14).attr(`width`, 28).attr(`height`, ([, , value]) => height - yScale(value) + 14).on("mouseover", (x2, [key, [head, ...rest]]) => tooltip.style("opacity", "1").html(`
+                    <table>
+                        <caption>${cols[key].value}</caption>
+                        <thead>
+                            <tr>
+                                ${head.map((it) => `<th>${it}</th>`).join("")}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rest.map((row) => `
+                                <tr>${row.map((it) => `<td>${it}</td>`).join("")}</tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                `)).on("mousemove", (x2, [, data]) => tooltip.style("left", `${event.pageX}px`).style("top", `${event.pageY}px`)).on("mouseout", () => tooltip.style("opacity", "0"));
 }
 function redrawDoughnutChart({ chart, set: set2, colors: colors2, cols, width, sortDirection, sortType }) {
   const t = transition().duration(1e3).delay(1e3);

@@ -7,7 +7,6 @@
     font-size: 0.8rem;
 }
 
-
 .tooltip:after {
     content: '';
     position: absolute;
@@ -20,22 +19,4 @@
     border-color: transparent;
     border-top-color: white;
     transform: translate(-50%, 0);
-}
-
-.tooltip * {
-    margin: 0;
-    padding: 0;
-}
-
-.tooltip dl > div {
-    display: flex;
-}
-
-.tooltip dd {
-    font-weight: bold;
-    width: 50%;
-}
-
-.tooltip dt {
-    width: 50%;
 }

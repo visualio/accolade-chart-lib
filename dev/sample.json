@@ -6,9 +6,7 @@
         "2": "60",
         "3": "70",
         "4": "80",
-        "5": "90",
-        "6": "80",
-        "7": "100"
+        "5": "90"
       },
       "colors": "7",
       "name": "Test"
@@ -16,9 +14,7 @@
     "2": {
       "values": {
         "4": "100",
-        "5": "100",
-        "6": "120",
-        "7": "130"
+        "5": "100"
       },
       "colors": "3",
       "name": "uppward"
@@ -41,10 +37,10 @@
       "value": "delta",
       "colors": "5",
       "annotation": [
-        ["No.", "1"],
-        ["Date", "1Q 2015"],
-        ["Class", "A"],
-        ["Type", "Investment"]
+        ["Type", "Class", "Number of shares"],
+        ["Subscription", "CZK", 1000],
+        ["Transfer", "EUR", 450],
+        ["Mistake"]
       ]
     },
     "5": {
@@ -58,6 +54,26 @@
     "7": {
       "value": "omega",
       "colors": "8"
+    },
+    "8": {
+      "value": "psi",
+      "colors": "1"
+    },
+    "9": {
+      "value": "theta",
+      "colors": "2"
+    },
+    "10": {
+      "value": "omega",
+      "colors": "8"
+    },
+    "11": {
+      "value": "psi",
+      "colors": "1"
+    },
+    "12": {
+      "value": "theta",
+      "colors": "2"
     }
   },
   "colors": {

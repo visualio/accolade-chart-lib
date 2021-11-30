@@ -207,6 +207,11 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
             }
         })
 
+    /* point helpers */
+    const getPointRadius = () => xScale.bandwidth() * symbolPointRatio
+    const getPointX = ([, colKey]) => {
+        return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 4
+    }
 
     /* annotations */
     const tooltip = select("body")
@@ -241,19 +246,14 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
 
     annotationsEnter.merge(annotations)
         .transition(t)
-        .attr(`x1`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1)
+        .attr(`x1`, ([colKey]) => getPointX([0, colKey]))
         .attr(`y1`, height)
-        .attr(`x2`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 1)
-        .attr(`y2`, ([, , value]) => yScale(value) - 12)
+        .attr(`x2`, ([colKey]) => getPointX([0, colKey]))
+        .attr(`y2`, ([, , value]) => yScale(value) + getPointRadius())
         .attr(`stroke`, "black")
 
 
     /* points */
-    const getPointRadius = () => xScale.bandwidth() * symbolPointRatio
-    const getPointX = ([, colKey]) => {
-        return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 4
-    }
-
     const pointsData =
         set.sort(([key]) => isMaster(key) ? 1 : -1)
             .reduce((acc, [key, {values}]) => acc.concat(pairs(values).map(pair => ([key, ...pair]))), [])
@@ -271,10 +271,7 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         .transition(t)
         .attr(`r`, () => getPointRadius())
         .attr(`cx`, getPointX)
-        .attr(`cy`, ([, , value]) => {
-            // console.log(value)
-            return yScale(value)
-        })
+        .attr(`cy`, ([, , value]) => yScale(value))
         .attr(`stroke`, ([rowKey]) => {
             const [, {colors: colorKey}] = set.find(([key]) => key === rowKey)
             const {border: {r, g, b}} = colors[colorKey]
@@ -294,10 +291,24 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         .attr(`y`, ([, , value]) => yScale(value) - 14)
         .attr(`width`, 28)
         .attr(`height`, ([, , value]) => height - yScale(value) + 14)
-        .on("mouseover", (x, [, data]) =>
+        .on("mouseover", (x, [key, [head, ...rest]]) =>
             tooltip
                 .style("opacity", "1")
-                .html(`<dl>${data.map(([key, value]) => `<div><dt>${key}</dt><dd>${value}</dd></div>`).join('')}</dl>`)
+                .html(`
+                    <table>
+                        <caption>${cols[key].value}</caption>
+                        <thead>
+                            <tr>
+                                ${head.map(it => `<th>${it}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rest.map(row => `
+                                <tr>${row.map(it => `<td>${it}</td>`).join('')}</tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `)
         )
         .on("mousemove", (x, [, data]) =>
             tooltip
