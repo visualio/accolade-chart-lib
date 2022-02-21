@@ -17,7 +17,7 @@ import {redrawBarChart} from "./charts/barChart"
 import {redrawLineChart} from "./charts/lineChart"
 import {redrawDoughnutChart} from "./charts/doughnutChart"
 import {getMaxLength, isNumeric} from "./utils"
-import {updateTable} from "./charts/table";
+import {renderTableTitle, updateTable} from "./charts/table";
 
 
 /*
@@ -458,9 +458,9 @@ export default function(element, state) {
             chart.select(`.axis--y`).call(createYAxis(set, newState))
             chart.select(`.axis--x`).call(createXAxis(set, newState))
             renderChart(set, newState, chart)
-            element.querySelector("header").remove()
+            element.querySelector("header") && element.querySelector("header").remove()
             renderHeader(newState, element)
-            element.querySelector("footer").remove()
+            element.querySelector("footer") && element.querySelector("footer").remove()
             renderChartFooter(set, newState, element)
         }
 
