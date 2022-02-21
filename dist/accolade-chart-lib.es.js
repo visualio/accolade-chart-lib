@@ -5913,6 +5913,54 @@ function emptyTable(table) {
     table.removeChild(table.firstChild);
   }
 }
+function scrollTo(requestedPosition, el) {
+  const speed = 8;
+  const scrollLeft = el.scrollLeft;
+  const maxScroll = el.scrollWidth - el.offsetWidth;
+  const position = requestedPosition < 0 ? 0 : requestedPosition > maxScroll ? maxScroll : requestedPosition;
+  if (Math.abs(scrollLeft - position) > 1) {
+    const diff = Math.abs(scrollLeft - position);
+    const polarity = scrollLeft > position ? -1 : 1;
+    el.scrollLeft = el.scrollLeft + polarity * (diff > speed ? diff / speed : 1);
+    window.requestAnimationFrame(() => scrollTo(position, el));
+    window.canClick = false;
+  } else {
+    window.canClick = true;
+  }
+}
+function renderTableTitle(text, wrapper, step) {
+  wrapper.scrollLeft = wrapper.scrollWidth;
+  window.canClick = true;
+  const tableTitle = document.createElement(`div`);
+  tableTitle.className = `table-header`;
+  const leftButton = document.createElement(`button`);
+  leftButton.innerText = `\u2190`;
+  leftButton.className = `hidden`;
+  leftButton.addEventListener(`click`, () => {
+    window.canClick && scrollTo(wrapper.scrollLeft - step, wrapper);
+  });
+  const rightButton = document.createElement(`button`);
+  rightButton.innerText = `\u2192`;
+  rightButton.className = `hidden`;
+  rightButton.addEventListener(`click`, () => {
+    window.canClick && scrollTo(wrapper.scrollLeft + step, wrapper);
+  });
+  const title = document.createElement(`span`);
+  title.innerText = text;
+  tableTitle.appendChild(leftButton);
+  tableTitle.appendChild(title);
+  tableTitle.appendChild(rightButton);
+  const toggleArrows = makeToggleArrows(leftButton, rightButton);
+  wrapper.addEventListener(`scroll`, ({ target }) => toggleArrows(target));
+  toggleArrows(wrapper);
+  return tableTitle;
+}
+function makeToggleArrows(leftButton, rightButton) {
+  return (wrapperElement) => {
+    leftButton.classList.toggle(`hidden`, Math.abs(wrapperElement.scrollLeft) < 2);
+    rightButton.classList.toggle(`hidden`, Math.abs(wrapperElement.scrollLeft + wrapperElement.offsetWidth - wrapperElement.scrollWidth) < 2);
+  };
+}
 function isBarChart(type) {
   return type === CHART_TYPE_BAR;
 }
@@ -6204,9 +6252,9 @@ function draw(element, state) {
       chart.select(`.axis--y`).call(createYAxis(set3, newState));
       chart.select(`.axis--x`).call(createXAxis(set3, newState));
       renderChart(set3, newState, chart);
-      element.querySelector("header").remove();
+      element.querySelector("header") && element.querySelector("header").remove();
       renderHeader(newState, element);
-      element.querySelector("footer").remove();
+      element.querySelector("footer") && element.querySelector("footer").remove();
       renderChartFooter(set3, newState, element);
     };
   } else if (isTable(state.chartType)) {
