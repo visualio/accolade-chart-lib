@@ -1,16 +1,17 @@
 .tooltip {
+    position: absolute;
     background: white;
     transition: opacity 500ms, transform 500ms;
-    transform: translate(-50%, calc(-100% - 2rem));
     box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.25);
     padding: 1rem;
     font-size: 0.8rem;
+    box-sizing: border-box;
+    min-width: 280px;
 }
 
-.tooltip:after {
+.tooltip-arrow {
     content: '';
     position: absolute;
-    left: 50%;
     top: 100%;
     width: 0;
     height: 0;
@@ -18,5 +19,4 @@
     border-style: solid;
     border-color: transparent;
     border-top-color: white;
-    transform: translate(-50%, 0);
 }

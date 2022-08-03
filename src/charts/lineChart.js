@@ -9,6 +9,7 @@ import {
 import {colors as colorSettings, symbolPointRatio} from "../settings"
 import pairs from "lodash.pairs"
 import {findLongestConsecutive, getLastItemFromObject, getMaxLength, isNumeric, uniqueString} from "../utils"
+import {computePosition, shift, flip, offset, arrow} from "@floating-ui/dom";
 import {createLabels, setFormatLocale} from "../chart"
 
 function createDefs({chart, colors: colorMap, t, set, xScale, idPrefix}) {
@@ -221,7 +222,6 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         .style("left", "0")
         .style("top", "0")
         .style("opacity", "0")
-        .style("width", "280px")
         .style("pointer-events", "none")
         .style("z-index", "500");
 
@@ -308,12 +308,48 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
                             `).join('')}
                         </tbody>
                     </table>
+                    <div class="tooltip-arrow"></div>
                 `)
         )
-        .on("mousemove", (x, [, data]) =>
-            tooltip
-                .style("left", `${event.pageX}px`)
-                .style("top", `${event.pageY}px`)
+        .on("mousemove", ({clientX, clientY}) => {
+                const virtualEl = {
+                    getBoundingClientRect() {
+                        return {
+                            width: 0,
+                            height: 0,
+                            x: clientX,
+                            y: clientY,
+                            left: clientX,
+                            right: clientX,
+                            top: clientY,
+                            bottom: clientY
+                        };
+                    }
+                };
+                const floatingElement = tooltip.node()
+                const arrowElement = floatingElement.lastElementChild
+                computePosition(virtualEl, floatingElement, {
+                    placement: "top",
+                    middleware: [
+                        offset(20),
+                        flip(),
+                        shift(),
+                        arrow({element: arrowElement})
+                    ]
+                }).then(({x, y, middlewareData: {arrow}, placement}) => {
+                    Object.assign(floatingElement.style, {
+                        top: placement === "top" ? `${y}px` : 0,
+                        transform: placement === "bottom" ? `translateY(100%)` : `none`,
+                        left: `${x}px`
+                    })
+                    Object.assign(arrowElement.style, {
+                        top: placement === "top" ? `100%` : 0,
+                        transform: placement === "bottom" ? `translateY(-100%) rotate(180deg)` : `none`,
+                        left: `${arrow.x}px`
+                    })
+                });
+
+            }
         )
         .on("mouseout", () => tooltip.style("opacity", "0"))
 }

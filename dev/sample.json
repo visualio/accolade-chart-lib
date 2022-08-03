@@ -35,17 +35,17 @@
     },
     "4": {
       "value": "delta",
-      "colors": "5",
+      "colors": "5"
+    },
+    "5": {
+      "value": "epsilon",
+      "colors": "6",
       "annotation": [
         ["Type", "Class", "Number of shares"],
         ["Subscription", "CZK", 1000],
         ["Transfer", "EUR", 450],
         ["Mistake"]
       ]
-    },
-    "5": {
-      "value": "epsilon",
-      "colors": "6"
     },
     "6": {
       "value": "psi",

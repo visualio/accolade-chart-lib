@@ -10,7 +10,7 @@
     "url": "https://github.com/visualio/accolade-chart-lib/issues"
   },
   "homepage": "https://github.com/visualio/accolade-chart-lib#readme",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "license": "MIT",
   "main": "dist/accolade-chart-lib.umd.js",
   "module": "dist/accolade-chart-lib.es.js",
@@ -39,6 +39,7 @@
     "trailingComma": "es5"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.0.0",
     "d3": "^7.1.1",
     "lodash.pairs": "^3.0.1",
     "svg-path-parser": "^1.1.0"
