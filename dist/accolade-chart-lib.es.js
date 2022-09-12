@@ -7125,7 +7125,7 @@ function renderChartFooter(set2, { cols, colors: colorMap, unit: unit2, displayL
     colorElem.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
     const valueElem = document.createElement(`div`);
     valueElem.className = `value`;
-    valueElem.innerHTML = `${format(``)(value)}${unit2 ? `${unit2 === `%` && locale2 === `en` ? `` : `&nbsp;`}${unit2}` : ``}`;
+    valueElem.innerHTML = `${format(`,`)(value)}${unit2 ? `${unit2 === `%` && locale2 === `en` ? `` : `&nbsp;`}${unit2}` : ``}`;
     const labelElem = document.createElement(`div`);
     labelElem.className = `label`;
     labelElem.innerHTML = label;

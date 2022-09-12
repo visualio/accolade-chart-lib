@@ -301,7 +301,7 @@ export function renderChartFooter(set, {cols, colors: colorMap, unit, displayLeg
 
             const valueElem = document.createElement(`div`)
             valueElem.className = `value`
-            valueElem.innerHTML = `${format(``)(value)}${unit ? `${unit === `%` && locale === `en` ? `` : `&nbsp;`}${unit}` : ``}`
+            valueElem.innerHTML = `${format(`,`)(value)}${unit ? `${unit === `%` && locale === `en` ? `` : `&nbsp;`}${unit}` : ``}`
 
             const labelElem = document.createElement(`div`)
             labelElem.className = `label`
