@@ -10,7 +10,7 @@
     "url": "https://github.com/visualio/accolade-chart-lib/issues"
   },
   "homepage": "https://github.com/visualio/accolade-chart-lib#readme",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "license": "MIT",
   "main": "dist/accolade-chart-lib.umd.js",
   "module": "dist/accolade-chart-lib.es.js",

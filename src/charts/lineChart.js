@@ -227,10 +227,11 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
 
     const annotationData = Object.entries(cols)
         .filter(([, {annotation}]) => annotation)
-        .map(([key, {annotation}]) => [
+        .map(([key, {annotation, annotationWidth = 2}]) => [
             key,
             annotation,
-            Math.max(...set.map(([, {values}]) => values[key]).filter(i => i))
+            Math.max(...set.map(([, {values}]) => values[key]).filter(i => i)),
+            annotationWidth
         ])
 
     const annotations = chart
@@ -241,8 +242,6 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
     const annotationsEnter = annotations.enter()
         .append(`line`)
         .attr(`class`, `annotation`)
-        .attr(`stroke-width`, 2)
-        .attr(`fill`, colorSettings.point)
 
     annotationsEnter.merge(annotations)
         .transition(t)
@@ -250,7 +249,8 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         .attr(`y1`, height)
         .attr(`x2`, ([colKey]) => getPointX([0, colKey]))
         .attr(`y2`, ([, , value]) => yScale(value) + getPointRadius())
-        .attr(`stroke`, "black")
+        .attr(`stroke`, colorSettings.label)
+        .attr(`stroke-width`, ([, , , annotationWidth]) => annotationWidth)
 
 
     /* points */
@@ -290,7 +290,7 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
         .attr(`x`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 14)
         .attr(`y`, ([, , value]) => yScale(value) - 14)
         .attr(`width`, 28)
-        .attr(`height`, ([, , value]) => height - yScale(value) + 14)
+        .attr(`height`, ([, , value]) => height - yScale(value) + 50)
         .on("mouseover", (x, [key, [head, ...rest]]) =>
             tooltip
                 .style("opacity", "1")

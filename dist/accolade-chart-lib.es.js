@@ -6702,15 +6702,16 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
     return xScale(colKey) + xScale.bandwidth() / 2 - getPointRadius() / 2 + 4;
   };
   const tooltip = select("body").append("div").attr("class", "tooltip").style("position", "absolute").style("left", "0").style("top", "0").style("opacity", "0").style("pointer-events", "none").style("z-index", "500");
-  const annotationData = Object.entries(cols).filter(([, { annotation }]) => annotation).map(([key, { annotation }]) => [
+  const annotationData = Object.entries(cols).filter(([, { annotation }]) => annotation).map(([key, { annotation, annotationWidth = 2 }]) => [
     key,
     annotation,
-    Math.max(...set2.map(([, { values }]) => values[key]).filter((i) => i))
+    Math.max(...set2.map(([, { values }]) => values[key]).filter((i) => i)),
+    annotationWidth
   ]);
   const annotations = chart.selectAll(`.annotation`).data(annotationData);
   annotations.exit().remove();
-  const annotationsEnter = annotations.enter().append(`line`).attr(`class`, `annotation`).attr(`stroke-width`, 2).attr(`fill`, colors.point);
-  annotationsEnter.merge(annotations).transition(t).attr(`x1`, ([colKey]) => getPointX([0, colKey])).attr(`y1`, height).attr(`x2`, ([colKey]) => getPointX([0, colKey])).attr(`y2`, ([, , value]) => yScale(value) + getPointRadius()).attr(`stroke`, "black");
+  const annotationsEnter = annotations.enter().append(`line`).attr(`class`, `annotation`);
+  annotationsEnter.merge(annotations).transition(t).attr(`x1`, ([colKey]) => getPointX([0, colKey])).attr(`y1`, height).attr(`x2`, ([colKey]) => getPointX([0, colKey])).attr(`y2`, ([, , value]) => yScale(value) + getPointRadius()).attr(`stroke`, colors.label).attr(`stroke-width`, ([, , , annotationWidth]) => annotationWidth);
   const pointsData = set2.sort(([key]) => isMaster(key) ? 1 : -1).reduce((acc, [key, { values }]) => acc.concat(lodash_pairs(values).map((pair) => [key, ...pair])), []).filter(([, , value]) => value);
   const points = chart.selectAll(`.point`).data(pointsData, ([rowKey, colKey]) => rowKey + colKey);
   points.exit().remove();
@@ -6720,7 +6721,7 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
     const { border: { r, g, b } } = colors$1[colorKey];
     return `rgb(${r}, ${g}, ${b})`;
   });
-  chart.selectAll(`.annotation-area`).data(annotationData).enter().append(`rect`).attr(`class`, `annotation-area`).attr(`fill`, "transparent").attr(`x`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 14).attr(`y`, ([, , value]) => yScale(value) - 14).attr(`width`, 28).attr(`height`, ([, , value]) => height - yScale(value) + 14).on("mouseover", (x2, [key, [head, ...rest]]) => tooltip.style("opacity", "1").html(`
+  chart.selectAll(`.annotation-area`).data(annotationData).enter().append(`rect`).attr(`class`, `annotation-area`).attr(`fill`, "transparent").attr(`x`, ([key]) => xScale(key) + xScale.bandwidth() / 2 - 14).attr(`y`, ([, , value]) => yScale(value) - 14).attr(`width`, 28).attr(`height`, ([, , value]) => height - yScale(value) + 50).on("mouseover", (x2, [key, [head, ...rest]]) => tooltip.style("opacity", "1").html(`
                     <table>
                         <caption>${cols[key].value}</caption>
                         <thead>
