@@ -16,7 +16,7 @@ import {axisBottom, scaleBand, scaleLinear, axisRight, format, formatDefaultLoca
 import {redrawBarChart} from "./charts/barChart"
 import {redrawLineChart} from "./charts/lineChart"
 import {redrawDoughnutChart} from "./charts/doughnutChart"
-import {getMaxLength, isNumeric} from "./utils"
+import {getMaxLength, isDefined, isNumeric} from "./utils"
 import {renderTableTitle, updateTable} from "./charts/table";
 
 
@@ -281,11 +281,12 @@ export function sortData(sortType, sortDirection, cols) {
     }
 }
 
-export function renderChartFooter(set, {cols, colors: colorMap, unit, displayLegend, sortType, sortDirection, locale}, element) {
+export function renderChartFooter(set, {cols, colors: colorMap, unit, displayLegend, sortType, sortDirection, locale, decimalPlaces}, element) {
     if (displayLegend === false)
         return false
     const footer = document.createElement(`footer`)
     footer.className = `footer`
+    const valueFormat = isDefined(decimalPlaces) ? format(`,.${decimalPlaces}f`) : format(`,`)
     set
         .sort(sortData(sortType, sortDirection, cols))
         .forEach(([colKey, value]) => {
@@ -301,7 +302,7 @@ export function renderChartFooter(set, {cols, colors: colorMap, unit, displayLeg
 
             const valueElem = document.createElement(`div`)
             valueElem.className = `value`
-            valueElem.innerHTML = `${format(`,`)(value)}${unit ? `${unit === `%` && locale === `en` ? `` : `&nbsp;`}${unit}` : ``}`
+            valueElem.innerHTML = `${valueFormat(value)}${unit ? `${unit === `%` && locale === `en` ? `` : `&nbsp;`}${unit}` : ``}`
 
             const labelElem = document.createElement(`div`)
             labelElem.className = `label`

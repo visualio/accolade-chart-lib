@@ -255,5 +255,6 @@
   "orientation": "column",
   "sortType": "keySort",
   "sortDirection": "asc",
-  "locale": "en"
+  "locale": "cs",
+  "decimalPlaces": 2
 }

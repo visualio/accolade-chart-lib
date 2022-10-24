@@ -73,6 +73,9 @@ function rgbaToRgb({
 function uniqueString() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
+function isDefined(value) {
+  return value !== void 0 && value !== null;
+}
 const symbolRatio = 1.7556;
 const symbolIndentRatio = 0.54;
 const symbolBodyRatio = 0.68;
@@ -7111,11 +7114,12 @@ function sortData(sortType, sortDirection, cols) {
     return -1;
   };
 }
-function renderChartFooter(set2, { cols, colors: colorMap, unit: unit2, displayLegend, sortType, sortDirection, locale: locale2 }, element) {
+function renderChartFooter(set2, { cols, colors: colorMap, unit: unit2, displayLegend, sortType, sortDirection, locale: locale2, decimalPlaces }, element) {
   if (displayLegend === false)
     return false;
   const footer = document.createElement(`footer`);
   footer.className = `footer`;
+  const valueFormat = isDefined(decimalPlaces) ? format(`,.${decimalPlaces}f`) : format(`,`);
   set2.sort(sortData(sortType, sortDirection, cols)).forEach(([colKey, value]) => {
     const { colors: colorKey, value: label } = cols[colKey];
     const { border: { r, g, b } } = colorMap[colorKey];
@@ -7126,7 +7130,7 @@ function renderChartFooter(set2, { cols, colors: colorMap, unit: unit2, displayL
     colorElem.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
     const valueElem = document.createElement(`div`);
     valueElem.className = `value`;
-    valueElem.innerHTML = `${format(`,`)(value)}${unit2 ? `${unit2 === `%` && locale2 === `en` ? `` : `&nbsp;`}${unit2}` : ``}`;
+    valueElem.innerHTML = `${valueFormat(value)}${unit2 ? `${unit2 === `%` && locale2 === `en` ? `` : `&nbsp;`}${unit2}` : ``}`;
     const labelElem = document.createElement(`div`);
     labelElem.className = `label`;
     labelElem.innerHTML = label;
