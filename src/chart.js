@@ -233,6 +233,7 @@ export function renderChart(set, state, chart) {
         cols: state.cols,
         unit: state.unit,
         locale: state.locale,
+        decimalPlaces: state.decimalPlaces,
         labels: {horizontalLabel, verticalLabel},
         sortDirection,
         sortType,
@@ -286,7 +287,7 @@ export function renderChartFooter(set, {cols, colors: colorMap, unit, displayLeg
         return false
     const footer = document.createElement(`footer`)
     footer.className = `footer`
-    const valueFormat = isDefined(decimalPlaces) ? format(`,.${decimalPlaces}f`) : format(`,`)
+    const valueFormat = createValueFormatter(decimalPlaces)
     set
         .sort(sortData(sortType, sortDirection, cols))
         .forEach(([colKey, value]) => {
@@ -316,6 +317,10 @@ export function renderChartFooter(set, {cols, colors: colorMap, unit, displayLeg
 
     element.insertAdjacentElement(`beforeend`, footer)
     return true
+}
+
+export function createValueFormatter(decimalPlaces) {
+    return isDefined(decimalPlaces) ? format(`,.${decimalPlaces}f`) : format(`,`)
 }
 
 /*

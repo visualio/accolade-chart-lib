@@ -3,14 +3,15 @@ import {
     line as lineChart,
     area as areaChart,
     interpolateArray,
-    curveMonotoneX, format,
+    curveMonotoneX,
+    format,
     select
 } from 'd3'
 import {colors as colorSettings, symbolPointRatio} from "../settings"
 import pairs from "lodash.pairs"
 import {findLongestConsecutive, getLastItemFromObject, getMaxLength, isNumeric, uniqueString} from "../utils"
 import {computePosition, shift, flip, offset, arrow} from "@floating-ui/dom";
-import {createLabels, setFormatLocale} from "../chart"
+import {createLabels, createValueFormatter, setFormatLocale} from "../chart"
 
 function createDefs({chart, colors: colorMap, t, set, xScale, idPrefix}) {
 
@@ -105,7 +106,8 @@ function getClipDimensions(values, xScale) {
     }
 }
 
-export function redrawLineChart({chart, set, xScale, yScale, colors, labels, height, width, locale, cols}) {
+export function redrawLineChart({chart, set, xScale, yScale, colors, labels, height, width, locale, cols, decimalPlaces}) {
+    const valueFormatter = createValueFormatter(decimalPlaces)
     setFormatLocale(locale)
     const idPrefix = uniqueString()
     const master = set[0][1] // TODO
@@ -129,7 +131,7 @@ export function redrawLineChart({chart, set, xScale, yScale, colors, labels, hei
             return name ? `
                     <tspan y="10" fill="${color}" stroke="${color}" stroke-width="10" font-size="30">•</tspan>
                     <tspan y="5" dx="10" font-size="12">${name}</tspan>
-                    <tspan dx="5" font-weight="bold" font-size="12">${format(`,`)(getLastItemFromObject(values))}</tspan>
+                    <tspan dx="5" font-weight="bold" font-size="12">${valueFormatter(getLastItemFromObject(values))}</tspan>
             ` : ``
         })
         .attr(`dx`, (ignore, idx) => idx > 0 ? 20 : -50)

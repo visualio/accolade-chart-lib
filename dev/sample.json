@@ -8,7 +8,7 @@
         "4": "8000351",
         "5": "8000351",
         "6": "9000",
-        "7": "9000"
+        "7": 9000.123000
       },
       "colors": "7",
       "name": "Test"
@@ -16,7 +16,7 @@
     "2": {
       "values": {
         "4": "100",
-        "5": "100"
+        "5": "100.123456"
       },
       "colors": "3",
       "name": "uppward"
@@ -256,5 +256,5 @@
   "sortType": "keySort",
   "sortDirection": "asc",
   "locale": "cs",
-  "decimalPlaces": 2
+  "decimalPlaces": 4
 }

@@ -6650,7 +6650,8 @@ function getClipDimensions(values, xScale) {
     width: 0
   };
 }
-function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, labels, height, width, locale: locale2, cols }) {
+function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, labels, height, width, locale: locale2, cols, decimalPlaces }) {
+  const valueFormatter = createValueFormatter(decimalPlaces);
   setFormatLocale(locale2);
   const idPrefix = uniqueString();
   const master = set2[0][1];
@@ -6668,7 +6669,7 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
     return name ? `
                     <tspan y="10" fill="${color2}" stroke="${color2}" stroke-width="10" font-size="30">\u2022</tspan>
                     <tspan y="5" dx="10" font-size="12">${name}</tspan>
-                    <tspan dx="5" font-weight="bold" font-size="12">${format(`,`)(getLastItemFromObject(values))}</tspan>
+                    <tspan dx="5" font-weight="bold" font-size="12">${valueFormatter(getLastItemFromObject(values))}</tspan>
             ` : ``;
   }).attr(`dx`, (ignore, idx) => idx > 0 ? 20 : -50);
   const masterArea = areaChart().curve(monotoneX).x(([key]) => xScale(key) + xScale.bandwidth() / 2).y0(() => yScale(minValue)).y1(([, value]) => yScale(value));
@@ -7071,6 +7072,7 @@ function renderChart(set2, state, chart) {
     cols: state.cols,
     unit: state.unit,
     locale: state.locale,
+    decimalPlaces: state.decimalPlaces,
     labels: { horizontalLabel, verticalLabel },
     sortDirection,
     sortType,
@@ -7119,7 +7121,7 @@ function renderChartFooter(set2, { cols, colors: colorMap, unit: unit2, displayL
     return false;
   const footer = document.createElement(`footer`);
   footer.className = `footer`;
-  const valueFormat = isDefined(decimalPlaces) ? format(`,.${decimalPlaces}f`) : format(`,`);
+  const valueFormat = createValueFormatter(decimalPlaces);
   set2.sort(sortData(sortType, sortDirection, cols)).forEach(([colKey, value]) => {
     const { colors: colorKey, value: label } = cols[colKey];
     const { border: { r, g, b } } = colorMap[colorKey];
@@ -7141,6 +7143,9 @@ function renderChartFooter(set2, { cols, colors: colorMap, unit: unit2, displayL
   });
   element.insertAdjacentElement(`beforeend`, footer);
   return true;
+}
+function createValueFormatter(decimalPlaces) {
+  return isDefined(decimalPlaces) ? format(`,.${decimalPlaces}f`) : format(`,`);
 }
 function createTextObject([, number2]) {
   const [, value, unit2] = /([^a-zA-Z]*)([a-zA-Z]?)/g.exec(format(`~s`)(number2));
