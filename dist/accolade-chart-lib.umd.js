@@ -13,7 +13,7 @@ var Vh=Object.defineProperty,qh=Object.defineProperties;var Bh=Object.getOwnProp
                         </thead>
                         <tbody>
                             ${X.map(V=>`
-                                <tr>${V.map(tt=>`<td>${tt}</td>`).join("")}</tr>
+                                <tr>${V.map(tt=>`<td data-value="${tt}">${tt}</td>`).join("")}</tr>
                             `).join("")}
                         </tbody>
                     </table>

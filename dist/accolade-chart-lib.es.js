@@ -6735,7 +6735,7 @@ function redrawLineChart({ chart, set: set2, xScale, yScale, colors: colors$1, l
                         </thead>
                         <tbody>
                             ${rest.map((row) => `
-                                <tr>${row.map((it) => `<td>${it}</td>`).join("")}</tr>
+                                <tr>${row.map((it) => `<td data-value="${it}">${it}</td>`).join("")}</tr>
                             `).join("")}
                         </tbody>
                     </table>
