@@ -1,15 +1,16 @@
 import {rgbaToRgb} from "./utils";
+import {Color, Coordinates, RGB} from "./types";
 
-export const symbolRatio = 1.7556
-export const symbolIndentRatio = 0.54
-export const symbolBodyRatio = 0.68
-export const symbolTextRatio = symbolBodyRatio * 0.5
-export const symbolPointRatio = 0.05
-export const fontAspectRatio = 0.5
-export const fontFamilyPrimary = `'Gotham CE', 'Gotham', sans-serif`
-export const fontSize = 20
-export const labelOffset = fontSize * 3
-export const margin = {bottom: 85, right: 0, top: fontSize, left: 0}
+export const symbolRatio: number = 1.7556
+export const symbolIndentRatio: number = 0.54
+export const symbolBodyRatio: number = 0.68
+export const symbolTextRatio: number = symbolBodyRatio * 0.5
+export const symbolPointRatio: number = 0.05
+export const fontAspectRatio: number = 0.5
+export const fontFamilyPrimary: string = `'Gotham CE', 'Gotham', sans-serif`
+export const fontSize: number = 20
+export const labelOffset: number = fontSize * 3
+export const margin: Coordinates = {bottom: 85, right: 0, top: fontSize, left: 0}
 
 export const colors = {
     tick: `#dcdee6`,
@@ -21,13 +22,13 @@ export const colors = {
     doughnutCenter: `#28225c`,
 }
 
-export const transparentColor = {
+export const transparentColor: Color = {
     start: {r: 0, g: 0, b: 0, a: 0},
     end: {r: 0, g: 0, b: 0, a: 0},
     border: {r: 0, g: 0, b: 0, a: 0},
 }
 
-const brandColors = [
+const brandColors: RGB[] = [
     {r: 206, g: 2, b: 32},
     {r: 227, g: 6, b: 19},
     {r: 244, g: 69, b: 0},
@@ -46,7 +47,7 @@ const brandColors = [
     {r: 167, g: 169, b: 172},
 ]
 
-export const colorSets = brandColors
+export const colorSets: Color[] = brandColors
     .map((color) => ({
         start: {r: 255, g: 255, b: 255, a: 1},
         end: {...rgbaToRgb({...color, a: 0.5}), a: 1},
