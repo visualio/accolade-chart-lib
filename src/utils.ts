@@ -1,6 +1,7 @@
-import {RGB, RGBA} from "./types";
+import {Cols, RGB, RGBA, RowValues, SortDirection, SortType} from './types';
 
-export function isNumeric(n: string): boolean {
+export function isNumeric(n: string|number): boolean {
+  if (typeof n === "number") return true;
   return !isNaN(parseFloat(n)) && isFinite(n as unknown as number);
 }
 
@@ -31,16 +32,20 @@ export function findLongestConsecutive(numbers: number[]): number[] {
 }
 
 export function getLastItemFromObject(
-  obj: Record<string | number, string | number>
-): string|number {
+  obj: RowValues
+): string | number {
   return obj[Object.keys(obj)[Object.keys(obj).length - 1]];
 }
 
 export function getMaxLength(
-  data: { values: number[] }
+  data: Array<{ values: Array<string | number> }>
 ): number {
   return Object.values(data).reduce((maxLength, { values }) => {
-    const currentMax = Math.max(...Object.values(values).map((i) => i.length));
+    const currentMax = Math.max(
+      ...Object.values(values).map((i) =>
+        typeof i === 'string' ? i.length : i.toString().length
+      )
+    );
     return currentMax > maxLength ? currentMax : maxLength;
   }, 0);
 }
@@ -53,10 +58,43 @@ export function rgbaToRgb({ r, g, b, a }: RGBA): RGB {
   };
 }
 
+export function rgbaToString({ r, g, b }: RGBA): string {
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+export function getRGBAOpacity({ a }: RGBA): number {
+  return a;
+}
+
 export function uniqueString(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 export function isDefined(value: unknown): boolean {
   return value !== undefined && value !== null;
+}
+
+export function parseToNumber(value: number | string) {
+  return typeof value === 'string' ? parseFloat(value) : value;
+}
+
+export function sortData(
+  sortType: SortType,
+  sortDirection: SortDirection,
+  cols: Cols
+) {
+  const isDesc = sortDirection === SortDirection.DESC;
+  return (
+    [keyA, valA]: [number | string, number | string],
+    [keyB, valB]: [number | string, number | string]
+  ) => {
+    if (sortType === SortType.ORIGINAL) return isDesc ? -1 : 1;
+    if (sortType === SortType.VALUE) {
+      return (parseToNumber(valA) - parseToNumber(valB)) * (isDesc ? -1 : 1);
+    }
+    if (sortType === SortType.KEY) {
+      return (cols[keyA].value > cols[keyB].value ? 1 : -1) * (isDesc ? -1 : 1);
+    }
+    return -1; // reverse the order by default
+  };
 }

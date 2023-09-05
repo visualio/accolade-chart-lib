@@ -1,19 +1,27 @@
-type Row = {
-  values: Record<string, string | number>;
+import { ScaleBand, ScaleLinear, Selection } from 'd3';
+
+export type Dimensions = { x: number; width: number };
+
+export type RowValues = Record<string, string | number>;
+
+export type Row = {
+  values: RowValues;
   colors: string;
   name: string;
 };
 
-type Rows = Record<string, Row>;
+export type Annotation = Array<Array<string | number>>
 
-type Col = {
+export type Rows = Record<string, Row>;
+
+export type Col = {
   value: string;
   colors: string;
-  annotation?: Array<Array<string | number>>;
+  annotation?: Annotation;
   annotationWidth?: number;
 };
 
-type Cols = Record<string, Col>;
+export type Cols = Record<string, Col>;
 
 export type RGB = {
   r: number;
@@ -29,27 +37,27 @@ export type Color = {
   border: RGBA;
 };
 
-enum ChartType {
+export enum ChartType {
   LINE = `line`,
   BAR = `bar`,
   DOUGHNUT = `doughnut`,
   TABLE = `table`,
 }
 
-type Colors = Record<string, Color>;
+export type Colors = Record<string, Color>;
 
-enum Locale {
+export enum Locale {
   CZECH = 'cs',
   ENGLISH = 'en',
 }
 
-enum SortType {
+export enum SortType {
   ORIGINAL = `originalSort`,
   KEY = `keySort`,
   VALUE = `valueSort`,
 }
 
-enum SortDirection {
+export enum SortDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
@@ -61,7 +69,7 @@ export type Coordinates = {
   left: number;
 };
 
-export interface Settings {
+export interface Config {
   rows: Rows;
   cols: Cols;
   colors: Colors;
@@ -81,4 +89,24 @@ export interface Settings {
   sortDirection: SortDirection;
   locale: Locale;
   decimalPlaces: number;
+  isTransposed?: boolean;
+  tableTitle?: string
 }
+
+export type ColorDatum = [string, Color];
+export type RowDatum = [string, Row];
+export type ValueDatum = [string, string | number];
+
+export type ChartLabels = {
+  horizontalLabel: string;
+  verticalLabel: string;
+};
+
+export type Chart = Selection<SVGGElement, any, any, any>;
+
+export type Scales = {
+  x: ScaleBand<string>;
+  y: ScaleLinear<number, number>;
+}
+
+export type AnnotationData = [string, Annotation, number, number]
